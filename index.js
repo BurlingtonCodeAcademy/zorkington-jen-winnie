@@ -237,10 +237,10 @@ let roomsInSchool = {
   schoolyard: { canChangeTo: ["hall", "trees"] },
   trees: { canChangeTo: ["tunnel", "schoolyard"] },
   hall: {
-    canChangeTo: ["schoolyard", "office", "lunchroom", "teachersLounge"],
+    canChangeTo: ["schoolyard", "office", "lunchroom", "lounge"],
   },
   office: { canChangeTo: ["hall"] },
-  teachersLounge: { canChangeTo: ["hall"] }, // how to add a code to open?
+  lounge: { canChangeTo: ["hall"] }, // how to add a code to open?
   lunchroom: { canChangeTo: ["hall", "classroom", "gym"] },
   classroom: { canChangeTo: ["lunchroom"] },
   gym: { canChangeTo: ["lunchroom", "tunnel"] },
@@ -266,7 +266,7 @@ let trees = new Room(
   false
 );
 let hall = new Room(
-  `Welcome to the main hallway of the school. From here you can go north to go back outside, east to go to the Office, south to go to the lunchroom, or west to go to the Teachers' Lounge.(to enter the Teachers' Lounge, type "enter teachersLounge")`,
+  `Welcome to the main hallway of the school. From here you can go north to go back outside, east to go to the Office, south to go to the lunchroom, or west to go to the Teachers' Lounge.(to enter the Teachers' Lounge, type "enter lounge")`,
   "there aren't any items in here....",
   false
 );
@@ -306,7 +306,7 @@ let lookupTableTwo = {
   trees: trees,
   hall: hall,
   office: office,
-  teachersLounge: lounge,
+  lounge: lounge,
   lunchroom: lunchroom,
   classroom: classroom,
   gym: gym,
@@ -411,16 +411,14 @@ async function play() {
     console.log(this.description);
     return play();
     // if they type "enter teachersLounge" the lockLounge function will kick in.
-  } else if (action === "enter" && target === "teachersLounge") {
+  } else if (action === "enter" && target === "lounge") {
     lockLounge();
     console.log(this.description);
     return play();
   } else if (action === "grab") {  
     console.log(lookupTableOne[target].grab());
     return play();
- // } else if (action === "grab" && target =)  
 
-//return `You can't grab that.\n>_`;
 
   } else if (action === "drop") {
     if (
@@ -442,7 +440,7 @@ async function play() {
         "Sorry, you have not found all of the lost items. You cannot drop the items until you find them all! Please keep looking.."
       );
       return play();
-    }
+    } //if they type anything other than these commands it will tell them it doesnt understand (how do we get it so that if they were to type "drop flkdjfalk" or "enter flkajfkld" it will tell them it doesnt understand? it will only 'not understand' single words...)
   } else {
     await ask(`sorry, I don't understand ${answer}\n>_`);
     play();
@@ -450,27 +448,35 @@ async function play() {
 
   //function to check if changing between the rooms is allowed.
 
+  //right now this doesn't work- it will both a. not let you enter any room and b. let you enter any room lol
   async function changeRooms(newRoom) {
     //console.log(newRoom);
     let validTransitions = roomsInSchool[currentRoom].canChangeTo;
     if (validTransitions.includes(newRoom)) {
-      currentRoom = newRoom;
+      newRoom = currentRoom;
       //console.log(this.description)
       play();
     } else {
       console.log("You can't go that way\n>_");
+      //for some reason this is triggered no matter what room they enter (even if it's valid) after the actual room description 
       play();
     }
-  } //right now, when you enter a room it gives both the room description & the line on 446
+  } //right now, when you enter a room it gives both the room description & the line on 460
 }
 
 /*----------Start Game---------------*/
 
 console.log(`You are standing in the schoolyard of your new school. It is the first day. 
-There is a door south of you to get inside the school, a couple trees to the east and other kids getting dropped off too.
-Your mom tells you as she drops you off, "don't forget your student ID, it's laying on the ground and the number is 12345!" 
-There is a sign on the door and something sitting on the steps. From here you can enter the hall... To enter a room, type enter and the room name(exactly as it's written....)\n To interact with an object, type use and the object's name.(it may sound weird to use some of the objects, but "use" is your best option.)\n To pick something up, type grab and the object's name.\n To examine something type examine and the object's name. To see what's in your inventory, type "inventory" & to see what's in a room, type "contents"`);
+There is a door south of you to get inside the school, a couple trees to the east and other kids getting dropped off too. Your mom tells you as she drops you off, "don't forget your student ID, it's laying on the ground and the number is 12345!" There is a sign on the door and something sitting on the steps. From here you can enter the hall... To enter a room, type enter and the room name(exactly as it's written....)\n To interact with an object, type use and the object's name.(it may sound weird to use some of the objects, but "use" is your best option.)\n To pick something up, type grab and the object's name.\n To examine something type examine and the object's name. To see what's in your inventory, type "inventory" & to see what's in a room, type "contents"`);
 play();
 
 
 //after working for the entire weekend on this, and having different functions work/break/work..we would love to go over our code with Bob or a TA to have a better understanding of how to structure it best, and how to fix some of our bugs so we can resubmit!
+
+//our main issues: 
+// -telling us that we can both enter and not enter a room (and gives room description), 
+// -items not leaving the room contents when they enter the player's inventory 
+// -the locked teachers lounge and locked classroom don't work /aren't triggered 
+// -when you try to grab the jacket it returns undefined 
+// -when you click use cabinet aka open the lost and found, it tells you that you won even if you dont drop the items there/ have the items in your inventory 
+// -errors out when you type something like grab "djlfal" or enter "flkajfa" like not real items or rooms, rather than just saying it doesn't understand. if you use the predefined action words, it gets confused when it doesnt understand the object of the action.
